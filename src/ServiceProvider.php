@@ -2,7 +2,8 @@
 
 namespace Amsoell\AssertJsonStructureMissing;
 
-use Illuminate\Foundation\Testing\TestResponse;
+use Illuminate\Testing\Assert;
+use Illuminate\Testing\TestResponse;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -10,7 +11,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         TestResponse::macro('assertJsonStructureMissing', function (array $structure = null, $responseData = null) {
             if (is_null($structure)) {
-                return $this->assertJson($this->json());
+                return $this->assertExactJson($this->json());
             }
 
             if (is_null($responseData)) {
@@ -19,17 +20,17 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
             foreach ($structure as $key => $value) {
                 if (is_array($value) && $key === '*') {
-                    \PHPUnit\Framework\Assert::assertInternalType('array', $responseData);
+                    Assert::assertIsArray($responseData);
 
                     foreach ($responseData as $responseDataItem) {
                         $this->assertJsonStructureMissing($structure['*'], $responseDataItem);
                     }
                 } elseif (is_array($value)) {
-                    \PHPUnit\Framework\Assert::assertArrayHasKey($key, $responseData);
+                    Assert::assertArrayHasKey($key, $responseData);
 
                     $this->assertJsonStructureMissing($structure[$key], $responseData[$key]);
                 } else {
-                    \PHPUnit\Framework\Assert::assertArrayNotHasKey($value, $responseData);
+                    Assert::assertArrayNotHasKey($value, $responseData);
                 }
             }
 
